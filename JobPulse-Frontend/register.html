@@ -1,0 +1,186 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - JobPulse</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Simple Navbar -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="logo">
+          <i class="fas fa-bolt"></i>
+          <span>JobPulse</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Register Form -->
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Create Account</h2>
+          <p>Join JobPulse and find your dream job</p>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input
+              type="text"
+              id="fullName"
+              class="form-control"
+              placeholder="John Doe"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="Create a strong password"
+              minlength="6"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number (Optional)</label>
+            <input
+              type="tel"
+              id="phone"
+              class="form-control"
+              placeholder="+1 234 567 8900"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="role">I want to:</label>
+            <select id="role" class="form-control" required>
+              <option value="">Select your role</option>
+              <option value="JOB_SEEKER">Find a Job</option>
+              <option value="RECRUITER">Hire Talent</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%">
+            <span id="registerBtnText">Create Account</span>
+            <span id="registerSpinner" style="display: none">
+              <i class="fas fa-spinner fa-spin"></i>
+            </span>
+          </button>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>
+            Already have an account?
+            <a href="login.html" class="link">Sign In</a>
+          </p>
+        </div>
+
+        <div class="text-center mt-3">
+          <a href="index.html" class="link">
+            <i class="fas fa-arrow-left"></i> Back to Home
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = {
+            fullName: document.getElementById("fullName").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            password: document.getElementById("password").value,
+            phone: document.getElementById("phone").value.trim(),
+            role: document.getElementById("role").value,
+          };
+
+          const btnText = document.getElementById("registerBtnText");
+          const spinner = document.getElementById("registerSpinner");
+
+          // Show loading state
+          btnText.style.display = "none";
+          spinner.style.display = "inline-block";
+
+          try {
+            const response = await api.register(formData);
+
+            // Auto login after registration
+            const loginResponse = await api.login({
+              email: formData.email,
+              password: formData.password,
+            });
+
+            // Show success message
+            auth.showAlert(
+              "Account created successfully! Redirecting...",
+              "success"
+            );
+
+            // Redirect based on role
+            setTimeout(() => {
+              if (formData.role === "RECRUITER") {
+                window.location.href = "recruiter-dashboard.html";
+              } else {
+                window.location.href = "jobs.html";
+              }
+            }, 1500);
+          } catch (error) {
+            console.error("Registration error:", error);
+
+            let errorMessage = "Registration failed. Please try again.";
+            if (error.message && error.message.includes("email")) {
+              errorMessage =
+                "Email already registered. Please use a different email.";
+            }
+
+            auth.showAlert(errorMessage, "error");
+
+            // Reset loading state
+            btnText.style.display = "inline-block";
+            spinner.style.display = "none";
+          }
+        });
+
+      // Check if already logged in
+      document.addEventListener("DOMContentLoaded", function () {
+        if (api.isLoggedIn()) {
+          window.location.href = "index.html";
+        }
+      });
+    </script>
+  </body>
+</html>

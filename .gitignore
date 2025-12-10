@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+dist/
+build/
+.env
+npm-debug.log
+yarn-error.log
+
+# Python/IDE (agar lagta ho)
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+
+# logs
+*.log

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPulse - WebSocket Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-card.online {
+            border-left-color: #28a745;
+        }
+
+        .status-card.offline {
+            border-left-color: #dc3545;
+        }
+
+        .notification-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .notification-card.new {
+            background: #e7f3ff;
+            border-color: #007bff;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-card .job-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .notification-card .company {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .notification-card .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .notification-card .salary {
+            color: #28a745;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        #notifications {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .counter {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        .log {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .log-entry.info {
+            color: #007bff;
+        }
+
+        .log-entry.success {
+            color: #28a745;
+        }
+
+        .log-entry.error {
+            color: #dc3545;
+        }
+
+        .log-entry.warning {
+            color: #ffc107;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔔 JobPulse WebSocket Test</h1>
+        <p>Real-time job notifications using WebSocket</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- Connection Panel -->
+        <div class="panel">
+            <h2>WebSocket Connection</h2>
+            <div id="statusCard" class="status-card offline">
+                <h3>Status: <span id="statusText">Disconnected</span></h3>
+                <p id="statusMessage">Click "Connect" to establish WebSocket connection</p>
+            </div>
+
+            <div class="button-group">
+                <button id="connectBtn" class="btn btn-primary">Connect to WebSocket</button>
+                <button id="disconnectBtn" class="btn btn-secondary" disabled>Disconnect</button>
+            </div>
+
+            <div class="log" id="connectionLog">
+                <!-- Connection logs will appear here -->
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="panel">
+            <h2>Real-time Notifications <span id="notificationCount" class="counter">0</span></h2>
+            <div id="notifications">
+                <!-- Notifications will appear here -->
+                <div class="notification-card">
+                    <div class="job-title">Waiting for notifications...</div>
+                    <div class="company">JobPulse System</div>
+                    <div class="meta">
+                        <span>Connect to start receiving</span>
+                        <span>--:--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="testNotificationBtn" class="btn btn-success">Send Test Notification</button>
+                <button id="clearNotificationsBtn" class="btn btn-danger">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topics Panel -->
+    <div class="panel">
+        <h2>Subscribe to Topics</h2>
+        <div class="button-group">
+            <button id="subscribeAllBtn" class="btn btn-primary">All Jobs</button>
+            <button id="subscribeRemoteBtn" class="btn btn-secondary">Remote Jobs</button>
+            <button id="subscribeBangaloreBtn" class="btn btn-secondary">Bangalore Jobs</button>
+            <button id="subscribeFullTimeBtn" class="btn btn-secondary">Full-time Jobs</button>
+        </div>
+        <div class="log" id="subscriptionLog">
+            <!-- Subscription logs will appear here -->
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    let stompClient = null;
+    let notificationCount = 0;
+    let isConnected = false;
+
+    // DOM Elements
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const testNotificationBtn = document.getElementById('testNotificationBtn');
+    const clearNotificationsBtn = document.getElementById('clearNotificationsBtn');
+    const statusCard = document.getElementById('statusCard');
+    const statusText = document.getElementById('statusText');
+    const statusMessage = document.getElementById('statusMessage');
+    const notificationCountElem = document.getElementById('notificationCount');
+    const notificationsContainer = document.getElementById('notifications');
+    const connectionLog = document.getElementById('connectionLog');
+    const subscriptionLog = document.getElementById('subscriptionLog');
+
+    // Topic subscription buttons
+    const subscribeAllBtn = document.getElementById('subscribeAllBtn');
+    const subscribeRemoteBtn = document.getElementById('subscribeRemoteBtn');
+    const subscribeBangaloreBtn = document.getElementById('subscribeBangaloreBtn');
+    const subscribeFullTimeBtn = document.getElementById('subscribeFullTimeBtn');
+
+    // Log functions
+    function logConnection(message, type = 'info') {
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${type}`;
+        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        connectionLog.appendChild(logEntry);
+        connectionLog.scrollTop = connectionLog.scrollHeight;
+    }
+
+    function logSubscription(message, type = 'info') {
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${type}`;
+        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        subscriptionLog.appendChild(logEntry);
+        subscriptionLog.scrollTop = subscriptionLog.scrollHeight;
+    }
+
+    // Update UI status
+    function updateStatus(connected) {
+        isConnected = connected;
+        if (connected) {
+            statusCard.className = 'status-card online';
+            statusText.textContent = 'Connected';
+            statusMessage.textContent = 'Receiving real-time notifications';
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            testNotificationBtn.disabled = false;
+        } else {
+            statusCard.className = 'status-card offline';
+            statusText.textContent = 'Disconnected';
+            statusMessage.textContent = 'Click "Connect" to establish WebSocket connection';
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            testNotificationBtn.disabled = true;
+        }
+    }
+
+    // Connect to WebSocket
+    function connect() {
+        const socket = new SockJS('http://localhost:8080/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            updateStatus(true);
+            logConnection('Connected to WebSocket server', 'success');
+
+            // Subscribe to main new-jobs topic
+            subscribeToTopic('/topic/new-jobs', 'all-jobs');
+
+            // Enable subscription buttons
+            enableSubscriptionButtons();
+
+        }, function(error) {
+            updateStatus(false);
+            logConnection('Connection error: ' + error, 'error');
+        });
+    }
+
+    // Disconnect from WebSocket
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+            logConnection('Disconnected from WebSocket server', 'warning');
+        }
+        updateStatus(false);
+        disableSubscriptionButtons();
+    }
+
+    // Subscribe to a topic
+    function subscribeToTopic(topic, subscriptionId) {
+        if (!stompClient || !isConnected) {
+            logSubscription('Cannot subscribe: Not connected', 'error');
+            return;
+        }
+
+        stompClient.subscribe(topic, function(message) {
+            try {
+                const notification = JSON.parse(message.body);
+                console.log('📨 Received WebSocket message:', notification);
+                addNotification(notification);
+                logSubscription(`Received: ${notification.title} at ${notification.company}`, 'success');
+            } catch (error) {
+                console.error('Error parsing notification:', error, 'Raw message:', message.body);
+                logSubscription(`Error parsing notification: ${error.message}`, 'error');
+            }
+        }, { id: subscriptionId });
+
+        logSubscription(`Subscribed to: ${topic}`, 'success');
+    }
+
+    // Add a notification to UI - FIXED VERSION
+    function addNotification(notification) {
+        notificationCount++;
+        notificationCountElem.textContent = notificationCount;
+
+        const notificationCard = document.createElement('div');
+        notificationCard.className = 'notification-card new';
+
+        const title = notification.title || 'New Job Alert';
+        const company = notification.company || 'Unknown Company';
+        const location = notification.location || 'Remote';
+        const salary = notification.salary ? `₹${parseFloat(notification.salary).toLocaleString('en-IN')}` : 'Not specified';
+        const timestamp = new Date().toLocaleTimeString();
+        const jobType = notification.jobType || 'Full Time';
+
+        notificationCard.innerHTML = `
+            <div class="job-title">${title}</div>
+            <div class="company">${company} • ${location}</div>
+            <div class="company">${jobType} • Salary: <span class="salary">${salary}</span></div>
+            <div class="meta">
+                <span>${notification.type || 'NEW_JOB'}</span>
+                <span>${timestamp}</span>
+            </div>
+        `;
+
+        // Get the first element child (skip text nodes)
+        const firstElementChild = notificationsContainer.firstElementChild;
+
+        // Check if the first child is the placeholder
+        if (firstElementChild &&
+            firstElementChild.textContent.includes('Waiting for notifications')) {
+            // Replace placeholder with new notification
+            notificationsContainer.innerHTML = '';
+            notificationsContainer.appendChild(notificationCard);
+        } else if (firstElementChild) {
+            // Insert before first notification
+            notificationsContainer.insertBefore(notificationCard, firstElementChild);
+        } else {
+            // Empty container, just append
+            notificationsContainer.appendChild(notificationCard);
+        }
+
+        // Remove "new" class after 5 seconds
+        setTimeout(() => {
+            notificationCard.classList.remove('new');
+        }, 5000);
+
+        // Play notification sound (optional)
+        playNotificationSound();
+    }
+
+    // Play notification sound
+    function playNotificationSound() {
+        try {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+            audio.volume = 0.3;
+            audio.play();
+        } catch (e) {
+            console.log('Could not play notification sound');
+        }
+    }
+
+    // Clear all notifications
+    function clearNotifications() {
+        notificationCount = 0;
+        notificationCountElem.textContent = notificationCount;
+        notificationsContainer.innerHTML = `
+            <div class="notification-card">
+                <div class="job-title">All notifications cleared</div>
+                <div class="company">JobPulse System</div>
+                <div class="meta">
+                    <span>Waiting for new notifications</span>
+                    <span>${new Date().toLocaleTimeString()}</span>
+                </div>
+            </div>
+        `;
+        logConnection('All notifications cleared', 'warning');
+    }
+
+    // Send test notification
+    function sendTestNotification() {
+        if (!stompClient || !isConnected) {
+            logConnection('Cannot send test: Not connected', 'error');
+            return;
+        }
+
+        const testNotification = {
+            type: 'TEST_NOTIFICATION',
+            title: 'Test Job - Software Engineer',
+            company: 'Test Company Inc.',
+            location: 'Remote',
+            jobId: Math.floor(Math.random() * 1000),
+            salary: 800000,
+            jobType: 'FULL_TIME',
+            timestamp: new Date().toISOString()
+        };
+
+        // Send to server
+        stompClient.send('/app/notify-new-job', {}, JSON.stringify(testNotification));
+        logConnection('Test notification sent to server', 'success');
+
+        // Also add locally for immediate feedback
+        setTimeout(() => addNotification(testNotification), 100);
+    }
+
+    // Enable subscription buttons
+    function enableSubscriptionButtons() {
+        subscribeAllBtn.disabled = false;
+        subscribeRemoteBtn.disabled = false;
+        subscribeBangaloreBtn.disabled = false;
+        subscribeFullTimeBtn.disabled = false;
+    }
+
+    // Disable subscription buttons
+    function disableSubscriptionButtons() {
+        subscribeAllBtn.disabled = true;
+        subscribeRemoteBtn.disabled = true;
+        subscribeBangaloreBtn.disabled = true;
+        subscribeFullTimeBtn.disabled = true;
+    }
+
+    // Event Listeners
+    connectBtn.addEventListener('click', connect);
+    disconnectBtn.addEventListener('click', disconnect);
+    testNotificationBtn.addEventListener('click', sendTestNotification);
+    clearNotificationsBtn.addEventListener('click', clearNotifications);
+
+    // Subscription button listeners
+    subscribeAllBtn.addEventListener('click', () => {
+        subscribeToTopic('/topic/new-jobs', 'all-jobs-sub');
+    });
+
+    subscribeRemoteBtn.addEventListener('click', () => {
+        subscribeToTopic('/topic/jobs/location/remote', 'remote-jobs');
+    });
+
+    subscribeBangaloreBtn.addEventListener('click', () => {
+        subscribeToTopic('/topic/jobs/location/bangalore', 'bangalore-jobs');
+    });
+
+    subscribeFullTimeBtn.addEventListener('click', () => {
+        subscribeToTopic('/topic/jobs/type/full_time', 'full-time-jobs');
+    });
+
+    // Initial log
+    logConnection('WebSocket test page loaded. Click "Connect" to start.', 'info');
+    logSubscription('Ready to subscribe to topics', 'info');
+
+    // Auto-connect on page load (optional)
+    // setTimeout(connect, 1000);
+</script>
+</body>
+</html>

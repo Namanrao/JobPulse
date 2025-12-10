@@ -1,0 +1,1091 @@
+<!-- job-details.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Details - JobPulse</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Job Details Page Styles */
+      .job-details-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 2rem;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      .job-details-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .job-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid var(--gray);
+      }
+
+      .job-title-section h1 {
+        font-size: 2rem;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+      }
+
+      .job-company {
+        font-size: 1.2rem;
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .job-location {
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .job-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--secondary);
+        background: var(--gray);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+      }
+
+      .job-salary-section {
+        text-align: right;
+      }
+
+      .salary-amount {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+      }
+
+      .salary-period {
+        color: var(--secondary);
+        font-size: 0.9rem;
+      }
+
+      .job-status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 1rem;
+      }
+
+      .status-active {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .job-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+      }
+
+      .job-main-content {
+        line-height: 1.6;
+      }
+
+      .job-sidebar {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--gray);
+      }
+
+      .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin: 1.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--gray);
+      }
+
+      .section-title:first-child {
+        margin-top: 0;
+      }
+
+      .job-description {
+        color: var(--dark);
+        line-height: 1.8;
+        white-space: pre-line;
+      }
+
+      .requirements-list,
+      .responsibilities-list {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
+      .requirements-list li,
+      .responsibilities-list li {
+        padding: 0.5rem 0;
+        color: var(--dark);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+
+      .requirements-list li:before,
+      .responsibilities-list li:before {
+        content: "✓";
+        color: #10b981;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+
+      .apply-section {
+        background: #f0f9ff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #bae6fd;
+        margin-top: 2rem;
+      }
+
+      .apply-section h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+      }
+
+      .application-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        font-weight: 500;
+      }
+
+      textarea.form-control {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--gray);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      textarea.form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .file-upload {
+        padding: 1rem;
+        border: 2px dashed var(--gray);
+        border-radius: 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .file-upload:hover {
+        border-color: var(--primary);
+        background: #f8fafc;
+      }
+
+      .file-upload input {
+        display: none;
+      }
+
+      .file-upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--secondary);
+      }
+
+      .file-upload-label i {
+        font-size: 1.5rem;
+        color: var(--primary);
+      }
+
+      .application-status {
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 1rem;
+      }
+
+      .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+      }
+
+      .status-reviewed {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+
+      .status-shortlisted {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+
+      .status-accepted {
+        background: #10b981;
+        color: white;
+        border: 1px solid #34d399;
+      }
+
+      .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .recruiter-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .application-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid var(--gray);
+        margin-bottom: 1rem;
+      }
+
+      .application-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .applicant-name {
+        font-weight: 600;
+        color: var(--dark);
+      }
+
+      .applicant-email {
+        color: var(--secondary);
+        font-size: 0.9rem;
+      }
+
+      .cover-letter {
+        color: var(--dark);
+        line-height: 1.6;
+        margin: 1rem 0;
+      }
+
+      @media (max-width: 768px) {
+        .job-content {
+          grid-template-columns: 1fr;
+        }
+
+        .job-header {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .job-salary-section {
+          text-align: left;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-content">
+          <a href="index.html" class="logo">
+            <i class="fas fa-bolt"></i>
+            <span>JobPulse</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="jobs.html">Jobs</a>
+            <a href="#" id="dashboardLink">Dashboard</a>
+
+            <div id="authButtons">
+              <!-- JavaScript se populate hoga -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Job Details -->
+    <div class="job-details-container">
+      <!-- Back Button -->
+      <a href="jobs.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Jobs
+      </a>
+
+      <!-- Alert Container -->
+      <div id="alertContainer"></div>
+
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading job details...
+      </div>
+
+      <!-- Job Details Content -->
+      <div id="jobContent" style="display: none">
+        <!-- Content will be loaded here by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="logo">
+            <i class="fas fa-bolt"></i>
+            <span>JobPulse</span>
+          </div>
+          <p>&copy; 2024 JobPulse. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/jobs.js"></script>
+    <script src="js/applications.js"></script>
+
+    <script>
+      // Global variables
+      let currentJob = null;
+      let currentApplication = null;
+      let userRole = null;
+      let jobId = null;
+
+      // Initialize page
+      document.addEventListener("DOMContentLoaded", async function () {
+        await initializePage();
+      });
+
+      // Initialize the page
+      async function initializePage() {
+        // Load authentication state
+        auth.loadAuthState();
+
+        // Check if user is logged in
+        if (!api.isLoggedIn()) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        // Get user role
+        const userData = await api.getCurrentUser();
+        userRole = userData?.data?.role || null;
+
+        // Setup dashboard link
+        setupDashboardLink();
+
+        // Get job ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        jobId = urlParams.get("id");
+
+        if (!jobId) {
+          auth.showAlert("No job specified", "error", "alertContainer");
+          return;
+        }
+
+        // Load job details
+        await loadJobDetails(jobId);
+
+        // Check if user has already applied (for job seekers)
+        if (userRole === "JOB_SEEKER") {
+          await checkExistingApplication(jobId);
+        } else if (userRole === "RECRUITER") {
+          await loadJobApplications(jobId);
+        }
+      }
+
+      // Setup dashboard link based on user role
+      function setupDashboardLink() {
+        const dashboardLink = document.getElementById("dashboardLink");
+
+        if (userRole === "RECRUITER") {
+          dashboardLink.textContent = "Recruiter Dashboard";
+          dashboardLink.href = "recruiter-dashboard.html";
+        } else if (userRole === "JOB_SEEKER") {
+          dashboardLink.textContent = "My Applications";
+          dashboardLink.href = "my-applications.html";
+        } else if (userRole === "ADMIN") {
+          dashboardLink.textContent = "Admin Panel";
+          dashboardLink.href = "admin-dashboard.html";
+        }
+      }
+
+      // Load job details
+      async function loadJobDetails(jobId) {
+        const loading = document.getElementById("loading");
+        const jobContent = document.getElementById("jobContent");
+
+        try {
+          currentJob = await jobsManager.getJobById(jobId);
+
+          if (!currentJob) {
+            auth.showAlert("Job not found", "error", "alertContainer");
+            return;
+          }
+
+          loading.style.display = "none";
+          jobContent.style.display = "block";
+          jobContent.innerHTML = generateJobDetailsHTML(currentJob);
+
+          // Setup event listeners for the form
+          if (userRole === "JOB_SEEKER" && !currentApplication) {
+            document
+              .getElementById("applyForm")
+              ?.addEventListener("submit", handleApplicationSubmit);
+          }
+        } catch (error) {
+          console.error("Error loading job details:", error);
+          loading.innerHTML =
+            '<div class="alert alert-error">Failed to load job details</div>';
+        }
+      }
+
+      // Check if user has already applied
+      async function checkExistingApplication(jobId) {
+        try {
+          const applications = await api.getMyApplications();
+          const existingApp = applications.data?.find(
+            (app) => app.job?.id == jobId
+          );
+
+          if (existingApp) {
+            currentApplication = existingApp;
+            updateApplicationStatusUI(existingApp);
+          }
+        } catch (error) {
+          console.error("Error checking existing application:", error);
+        }
+      }
+
+      // Load job applications (for recruiters)
+      async function loadJobApplications(jobId) {
+        try {
+          const response = await api.getJobApplications(jobId);
+          if (response.data && response.data.length > 0) {
+            displayApplications(response.data);
+          }
+        } catch (error) {
+          console.error("Error loading applications:", error);
+        }
+      }
+
+      // Generate job details HTML
+      function generateJobDetailsHTML(job) {
+        const isActive = job.active !== false;
+        const isJobSeeker = userRole === "JOB_SEEKER";
+        const isRecruiter = userRole === "RECRUITER";
+
+        // Format salary
+        const formattedSalary = job.salary
+          ? `$${job.salary.toLocaleString()}`
+          : "Negotiable";
+
+        // Format deadline
+        let deadlineInfo = "";
+        if (job.deadline) {
+          const deadlineDate = new Date(job.deadline);
+          const today = new Date();
+          const daysLeft = Math.ceil(
+            (deadlineDate - today) / (1000 * 60 * 60 * 24)
+          );
+
+          if (daysLeft > 0) {
+            deadlineInfo = `
+                        <div class="job-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Apply within ${daysLeft} days</span>
+                        </div>
+                    `;
+          } else {
+            deadlineInfo = `
+                        <div class="job-meta-item" style="background: #fee2e2; color: #991b1b;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Deadline passed</span>
+                        </div>
+                    `;
+          }
+        }
+
+        // Application section based on user role
+        let applicationSection = "";
+
+        if (isJobSeeker) {
+          if (currentApplication) {
+            // Already applied
+            applicationSection =
+              generateApplicationStatusHTML(currentApplication);
+          } else if (isActive) {
+            // Can apply
+            applicationSection = generateApplyFormHTML();
+          } else {
+            // Job closed
+            applicationSection = `
+                        <div class="apply-section">
+                            <h3>Job Closed</h3>
+                            <p>This job is no longer accepting applications.</p>
+                        </div>
+                    `;
+          }
+        } else if (isRecruiter) {
+          // Recruiter view
+          applicationSection = generateRecruiterViewHTML();
+        }
+
+        return `
+                <div class="job-details-card">
+                    <div class="job-header">
+                        <div class="job-title-section">
+                            <h1>
+                                ${job.title}
+                                <span class="job-status-badge ${
+                                  isActive ? "status-active" : "status-inactive"
+                                }">
+                                    ${isActive ? "ACTIVE" : "CLOSED"}
+                                </span>
+                            </h1>
+                            <p class="job-company">${job.company}</p>
+                            <p class="job-location">
+                                <i class="fas fa-map-marker-alt"></i> ${
+                                  job.location
+                                }
+                            </p>
+                            
+                            <div class="job-meta">
+                                <div class="job-meta-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span>${
+                                      job.jobType
+                                        ? job.jobType.replace("_", " ")
+                                        : "Full Time"
+                                    }</span>
+                                </div>
+                                <div class="job-meta-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>${
+                                      job.experienceLevel
+                                        ? job.experienceLevel.replace("_", " ")
+                                        : "Any Level"
+                                    }</span>
+                                </div>
+                                ${deadlineInfo}
+                            </div>
+                        </div>
+                        
+                        <div class="job-salary-section">
+                            <div class="salary-amount">${formattedSalary}</div>
+                            <div class="salary-period">Annual Salary</div>
+                            ${
+                              job.applicationCount
+                                ? `
+                                <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--secondary);">
+                                    <i class="fas fa-users"></i> ${job.applicationCount} applicants
+                                </div>
+                            `
+                                : ""
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="job-content">
+                        <div class="job-main-content">
+                            <h3 class="section-title">Job Description</h3>
+                            <div class="job-description">${
+                              job.description || "No description provided."
+                            }</div>
+                            
+                            ${
+                              job.requirements
+                                ? `
+                                <h3 class="section-title">Requirements</h3>
+                                <ul class="requirements-list">
+                                    ${job.requirements
+                                      .split("\n")
+                                      .map((req) => `<li>${req.trim()}</li>`)
+                                      .join("")}
+                                </ul>
+                            `
+                                : ""
+                            }
+                            
+                            ${
+                              job.responsibilities
+                                ? `
+                                <h3 class="section-title">Responsibilities</h3>
+                                <ul class="responsibilities-list">
+                                    ${job.responsibilities
+                                      .split("\n")
+                                      .map((resp) => `<li>${resp.trim()}</li>`)
+                                      .join("")}
+                                </ul>
+                            `
+                                : ""
+                            }
+                        </div>
+                        
+                        <div class="job-sidebar">
+                            <h3 class="section-title">Job Information</h3>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div>
+                                    <strong>Company:</strong><br>
+                                    ${job.company}
+                                </div>
+                                <div>
+                                    <strong>Location:</strong><br>
+                                    ${job.location}
+                                </div>
+                                <div>
+                                    <strong>Job Type:</strong><br>
+                                    ${
+                                      job.jobType
+                                        ? job.jobType.replace("_", " ")
+                                        : "Not specified"
+                                    }
+                                </div>
+                                <div>
+                                    <strong>Experience:</strong><br>
+                                    ${
+                                      job.experienceLevel
+                                        ? job.experienceLevel.replace("_", " ")
+                                        : "Not specified"
+                                    }
+                                </div>
+                                ${
+                                  job.deadline
+                                    ? `
+                                    <div>
+                                        <strong>Deadline:</strong><br>
+                                        ${new Date(
+                                          job.deadline
+                                        ).toLocaleDateString()}
+                                    </div>
+                                `
+                                    : ""
+                                }
+                                <div>
+                                    <strong>Posted by:</strong><br>
+                                    ${job.postedBy || "Recruiter"}
+                                </div>
+                                <div>
+                                    <strong>Posted on:</strong><br>
+                                    ${new Date(
+                                      job.createdAt
+                                    ).toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${applicationSection}
+                </div>
+                
+                <!-- Applications List (for recruiters) -->
+                <div id="applicationsList" style="display: none;"></div>
+            `;
+      }
+
+      // Generate application status HTML
+      function generateApplicationStatusHTML(application) {
+        const statusColors = {
+          PENDING: "status-pending",
+          REVIEWED: "status-reviewed",
+          SHORTLISTED: "status-shortlisted",
+          ACCEPTED: "status-accepted",
+          REJECTED: "status-rejected",
+        };
+
+        const statusText = {
+          PENDING: "Pending Review",
+          REVIEWED: "Under Review",
+          SHORTLISTED: "Shortlisted",
+          ACCEPTED: "Accepted 🎉",
+          REJECTED: "Rejected",
+        };
+
+        return `
+                <div class="apply-section">
+                    <h3>Your Application Status</h3>
+                    <div class="application-status ${
+                      statusColors[application.status]
+                    }">
+                        <h4>${statusText[application.status]}</h4>
+                        <p>Applied on: ${new Date(
+                          application.appliedDate
+                        ).toLocaleDateString()}</p>
+                        ${
+                          application.coverLetter
+                            ? `
+                            <p style="margin-top: 1rem; text-align: left;">
+                                <strong>Your Cover Letter:</strong><br>
+                                ${application.coverLetter}
+                            </p>
+                        `
+                            : ""
+                        }
+                    </div>
+                    
+                    ${
+                      application.status === "PENDING"
+                        ? `
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <button onclick="withdrawApplication(${application.id})" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Withdraw Application
+                            </button>
+                        </div>
+                    `
+                        : ""
+                    }
+                </div>
+            `;
+      }
+
+      // Generate apply form HTML
+      function generateApplyFormHTML() {
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        const hasResume = userData?.data?.resumeUrl;
+
+        return `
+                <div class="apply-section">
+                    <h3>Apply for this Position</h3>
+                    <form id="applyForm" class="application-form">
+                        <div class="form-group">
+                            <label for="coverLetter">Cover Letter (Optional)</label>
+                            <textarea 
+                                id="coverLetter" 
+                                class="form-control" 
+                                placeholder="Tell us why you're interested in this position..."
+                                rows="4"
+                            ></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Resume</label>
+                            ${
+                              hasResume
+                                ? `
+                                <div style="padding: 1rem; background: #d1fae5; border-radius: 6px; color: #065f46;">
+                                    <i class="fas fa-check-circle"></i> Using your uploaded resume
+                                </div>
+                            `
+                                : `
+                                <div class="file-upload">
+                                    <label class="file-upload-label" onclick="document.getElementById('resumeUpload').click()">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>Upload Resume (PDF/DOC)</span>
+                                        <span style="font-size: 0.8rem;">Click to browse files</span>
+                                    </label>
+                                    <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx">
+                                </div>
+                                <p style="font-size: 0.9rem; color: var(--secondary); margin-top: 0.5rem;">
+                                    You can also upload a resume from your <a href="profile.html">profile page</a>
+                                </p>
+                            `
+                            }
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Submit Application
+                        </button>
+                    </form>
+                </div>
+            `;
+      }
+
+      // Generate recruiter view HTML
+      function generateRecruiterViewHTML() {
+        return `
+                <div class="apply-section">
+                    <h3><i class="fas fa-chart-bar"></i> Recruiter Dashboard</h3>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button onclick="loadJobApplications(${jobId})" class="btn btn-primary">
+                            <i class="fas fa-sync"></i> Refresh Applications
+                        </button>
+                        <button onclick="toggleJobStatus(${jobId})" class="btn ${
+          currentJob.active ? "btn-danger" : "btn-success"
+        }">
+                            <i class="fas fa-power-off"></i> ${
+                              currentJob.active
+                                ? "Deactivate Job"
+                                : "Activate Job"
+                            }
+                        </button>
+                        <a href="recruiter-dashboard.html" class="btn btn-outline">
+                            <i class="fas fa-tachometer-alt"></i> Full Dashboard
+                        </a>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Handle application submit
+      async function handleApplicationSubmit(event) {
+        event.preventDefault();
+
+        const coverLetter = document.getElementById("coverLetter").value;
+        const applyBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = applyBtn.innerHTML;
+
+        // Show loading
+        applyBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        applyBtn.disabled = true;
+
+        try {
+          const response = await applicationsManager.applyForJob(
+            jobId,
+            coverLetter
+          );
+
+          if (response.success) {
+            auth.showAlert(
+              "Application submitted successfully!",
+              "success",
+              "alertContainer"
+            );
+            currentApplication = response.data;
+            document.getElementById("jobContent").innerHTML =
+              generateJobDetailsHTML(currentJob);
+          }
+        } catch (error) {
+          console.error("Error submitting application:", error);
+          auth.showAlert(
+            error.message || "Failed to submit application",
+            "error",
+            "alertContainer"
+          );
+
+          // Reset button
+          applyBtn.innerHTML = originalText;
+          applyBtn.disabled = false;
+        }
+      }
+
+      // Update application status UI
+      function updateApplicationStatusUI(application) {
+        const applySection = document.querySelector(".apply-section");
+        if (applySection) {
+          applySection.innerHTML = generateApplicationStatusHTML(application);
+        }
+      }
+
+      // Display applications (for recruiters)
+      function displayApplications(applications) {
+        const applicationsList = document.getElementById("applicationsList");
+        applicationsList.style.display = "block";
+
+        applicationsList.innerHTML = `
+                <div class="job-details-card">
+                    <h3 style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-users"></i> Applications (${
+                          applications.length
+                        })
+                    </h3>
+                    ${applications
+                      .map((app) => generateApplicationCardHTML(app))
+                      .join("")}
+                </div>
+            `;
+      }
+
+      // Generate application card HTML
+      function generateApplicationCardHTML(application) {
+        const statusColors = {
+          PENDING: "#fef3c7",
+          REVIEWED: "#dbeafe",
+          SHORTLISTED: "#d1fae5",
+          ACCEPTED: "#10b981",
+          REJECTED: "#fee2e2",
+        };
+
+        return `
+                <div class="application-card">
+                    <div class="application-header">
+                        <div>
+                            <div class="applicant-name">${
+                              application.applicant?.fullName || "Applicant"
+                            }</div>
+                            <div class="applicant-email">${
+                              application.applicant?.email || ""
+                            }</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="padding: 0.25rem 0.75rem; border-radius: 20px; background: ${
+                              statusColors[application.status]
+                            }; 
+                                  color: ${
+                                    application.status === "ACCEPTED"
+                                      ? "white"
+                                      : "var(--dark)"
+                                  }; font-size: 0.8rem;">
+                                ${application.status}
+                            </span>
+                            <button onclick="updateApplicationStatus(${
+                              application.id
+                            })" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Update
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${
+                      application.coverLetter
+                        ? `
+                        <div class="cover-letter">
+                            <strong>Cover Letter:</strong><br>
+                            ${application.coverLetter}
+                        </div>
+                    `
+                        : ""
+                    }
+                    
+                    <div style="font-size: 0.9rem; color: var(--secondary);">
+                        Applied: ${new Date(
+                          application.appliedDate
+                        ).toLocaleDateString()}
+                    </div>
+                </div>
+            `;
+      }
+
+      // Withdraw application
+      async function withdrawApplication(applicationId) {
+        if (!confirm("Are you sure you want to withdraw your application?"))
+          return;
+
+        try {
+          await applicationsManager.withdrawApplication(applicationId);
+          auth.showAlert(
+            "Application withdrawn successfully",
+            "success",
+            "alertContainer"
+          );
+          currentApplication = null;
+          document.getElementById("jobContent").innerHTML =
+            generateJobDetailsHTML(currentJob);
+        } catch (error) {
+          console.error("Error withdrawing application:", error);
+          auth.showAlert(
+            error.message || "Failed to withdraw application",
+            "error",
+            "alertContainer"
+          );
+        }
+      }
+
+      // Toggle job status (for recruiters)
+      async function toggleJobStatus(jobId) {
+        try {
+          const response = await api.toggleJobStatus(jobId);
+          auth.showAlert(
+            `Job ${
+              response.data.active ? "activated" : "deactivated"
+            } successfully`,
+            "success",
+            "alertContainer"
+          );
+          currentJob.active = response.data.active;
+          document.getElementById("jobContent").innerHTML =
+            generateJobDetailsHTML(currentJob);
+        } catch (error) {
+          console.error("Error toggling job status:", error);
+          auth.showAlert(
+            "Failed to update job status",
+            "error",
+            "alertContainer"
+          );
+        }
+      }
+
+      // Update application status (for recruiters)
+      async function updateApplicationStatus(applicationId) {
+        const newStatus = prompt(
+          "Enter new status (PENDING, REVIEWED, SHORTLISTED, ACCEPTED, REJECTED):"
+        );
+        if (!newStatus) return;
+
+        try {
+          await applicationsManager.updateApplicationStatus(
+            applicationId,
+            newStatus
+          );
+          auth.showAlert(
+            "Application status updated",
+            "success",
+            "alertContainer"
+          );
+          loadJobApplications(jobId);
+        } catch (error) {
+          console.error("Error updating application:", error);
+          auth.showAlert(
+            "Failed to update application",
+            "error",
+            "alertContainer"
+          );
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Permissions-Policy" content="unload=()" />
+    <title>Recruiter Dashboard - JobPulse</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Add STOMP and SockJS libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container nav-container">
+        <a href="index.html" class="logo">
+          <i class="fas fa-bolt"></i> JobPulse
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="jobs.html"><i class="fas fa-briefcase"></i> Jobs</a>
+          <a href="recruiter-dashboard.html" class="active">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+          <!-- Add auth buttons container -->
+          <div id="authButtons" style="margin-left: auto; display: none"></div>
+          <div class="user-menu">
+            <span id="userName"><i class="fas fa-user"></i> Recruiter</span>
+            <div class="dropdown">
+              <a href="my-applications.html">
+                <i class="fas fa-file-alt"></i> Applications
+              </a>
+              <a href="#" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
+          </div>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <!-- Dashboard Header -->
+      <div class="dashboard-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Recruiter Dashboard</h1>
+        <p>Manage your job postings and applications</p>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #dbeafe">
+            <i class="fas fa-briefcase" style="color: #2563eb"></i>
+          </div>
+          <div class="stat-content">
+            <h3 id="activeJobsCount">0</h3>
+            <p>Active Jobs</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #f0f9ff">
+            <i class="fas fa-file-alt" style="color: #0ea5e9"></i>
+          </div>
+          <div class="stat-content">
+            <h3 id="totalApplications">0</h3>
+            <p>Total Applications</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #f0fdf4">
+            <i class="fas fa-check-circle" style="color: #10b981"></i>
+          </div>
+          <div class="stat-content">
+            <h3 id="shortlistedCount">0</h3>
+            <p>Shortlisted</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #fef2f2">
+            <i class="fas fa-clock" style="color: #f59e0b"></i>
+          </div>
+          <div class="stat-content">
+            <h3 id="pendingReview">0</h3>
+            <p>Pending Review</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="createJobBtn" class="btn btn-primary">
+          <i class="fas fa-plus-circle"></i> Post New Job
+        </button>
+        <button id="refreshBtn" class="btn btn-secondary">
+          <i class="fas fa-sync-alt"></i> Refresh Dashboard
+        </button>
+        <!-- Test Notification Button -->
+        <button
+          id="testNotificationBtn"
+          class="btn btn-info"
+          style="display: none"
+        >
+          <i class="fas fa-bell"></i> Test Notification
+        </button>
+      </div>
+
+      <!-- Job Management Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-list-alt"></i> My Job Postings</h2>
+          <div class="section-actions">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="jobSearch"
+                placeholder="Search your jobs..."
+              />
+            </div>
+            <select id="jobStatusFilter" class="filter-select">
+              <option value="all">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="jobsContainer" class="jobs-list">
+          <!-- Jobs will be loaded here dynamically -->
+          <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading your job postings...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Applications -->
+      <div class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-users"></i> Recent Applications</h2>
+          <a href="#" id="viewAllApplications" class="btn-text">View All →</a>
+        </div>
+        <div id="recentApplications" class="applications-list">
+          <!-- Recent applications will be loaded here -->
+          <div class="empty-state">
+            <i class="fas fa-users-slash"></i>
+            <p>No applications yet. Applications will appear here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Job Modal -->
+    <div id="createJobModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fas fa-briefcase"></i> Post New Job</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="createJobForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="jobTitle">Job Title *</label>
+                <input
+                  type="text"
+                  id="jobTitle"
+                  name="title"
+                  required
+                  placeholder="e.g., Senior Software Engineer"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="jobCompany">Company Name *</label>
+                <input
+                  type="text"
+                  id="jobCompany"
+                  name="company"
+                  required
+                  placeholder="Your company name"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="jobLocation">Location *</label>
+                <input
+                  type="text"
+                  id="jobLocation"
+                  name="location"
+                  required
+                  placeholder="e.g., Remote, Mumbai, Bangalore"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="jobSalary">Salary (₹) *</label>
+                <input
+                  type="number"
+                  id="jobSalary"
+                  name="salary"
+                  required
+                  placeholder="e.g., 1500000"
+                  step="10000"
+                  min="0"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="jobType">Job Type *</label>
+                <select id="jobType" name="jobType" required>
+                  <option value="">Select Job Type</option>
+                  <option value="FULL_TIME">Full Time</option>
+                  <option value="PART_TIME">Part Time</option>
+                  <option value="CONTRACT">Contract</option>
+                  <option value="INTERNSHIP">Internship</option>
+                  <option value="REMOTE">Remote</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="experienceLevel">Experience Level</label>
+                <select id="experienceLevel" name="experienceLevel">
+                  <option value="">Select Experience</option>
+                  <option value="ENTRY_LEVEL">Entry Level</option>
+                  <option value="MID_LEVEL">Mid Level</option>
+                  <option value="SENIOR_LEVEL">Senior Level</option>
+                  <option value="EXECUTIVE">Executive</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="jobDescription">Job Description *</label>
+              <textarea
+                id="jobDescription"
+                name="description"
+                rows="5"
+                required
+                placeholder="Describe the job responsibilities, requirements, and benefits..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="jobRequirements">Requirements</label>
+              <textarea
+                id="jobRequirements"
+                name="requirements"
+                rows="3"
+                placeholder="List the skills and qualifications required..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="jobResponsibilities">Responsibilities</label>
+              <textarea
+                id="jobResponsibilities"
+                name="responsibilities"
+                rows="3"
+                placeholder="List the job responsibilities..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary modal-close">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Post Job
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Applications Modal -->
+    <div id="applicationsModal" class="modal">
+      <div class="modal-content wide-modal">
+        <div class="modal-header">
+          <h2 id="modalJobTitle">Job Applications</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="applicationsList">
+            <!-- Applications will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2024 JobPulse. All rights reserved.</p>
+        <p>Recruiter Dashboard v1.0</p>
+      </div>
+    </footer>
+
+    <!-- Error handling script -->
+    <script>
+      // Fix for share-modal.js and other errors
+      (function () {
+        // Override window.onerror to catch all errors
+        const originalOnError = window.onerror;
+        window.onerror = function (message, source, lineno, colno, error) {
+          // Ignore share-modal.js errors
+          if (source && source.includes("share-modal.js")) {
+            console.warn("Ignored share-modal.js error:", message);
+            return true; // Prevent default error handling
+          }
+
+          // Call original error handler if exists
+          if (originalOnError) {
+            return originalOnError(message, source, lineno, colno, error);
+          }
+          return false;
+        };
+
+        // Also override console.error for share-modal.js
+        const originalConsoleError = console.error;
+        console.error = function (...args) {
+          if (
+            args.length > 0 &&
+            typeof args[0] === "string" &&
+            args[0].includes("share-modal.js")
+          ) {
+            console.warn("Ignored share-modal.js error");
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+
+        console.log("Error handlers installed successfully");
+      })();
+    </script>
+
+    <!-- Main application script -->
+    <script>
+      // Prevent multiple script loading and initialization
+      (function () {
+        console.log("Initializing JobPulse Dashboard...");
+
+        // Track initialization state
+        if (window.pageInitialized) {
+          console.log("Page already initialized, skipping...");
+          return;
+        }
+        window.pageInitialized = true;
+
+        // Define API_BASE_URL if not defined
+        if (typeof API_BASE_URL === "undefined") {
+          window.API_BASE_URL = "http://localhost:8080/api";
+          console.log("API_BASE_URL set to:", window.API_BASE_URL);
+        }
+
+        // Global WebSocket state
+        window.webSocketState = {
+          connected: false,
+          stompClient: null,
+          subscriptions: [],
+        };
+
+        // Load scripts in correct order
+        const loadScript = (src) => {
+          return new Promise((resolve, reject) => {
+            // Check if script is already loaded
+            const existingScript = document.querySelector(
+              `script[src="${src}"]`
+            );
+            if (existingScript) {
+              console.log(`Script ${src} already loaded`);
+              resolve();
+              return;
+            }
+
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = () => {
+              console.log(`Loaded: ${src}`);
+              resolve();
+            };
+            script.onerror = (error) => {
+              console.error(`Failed to load: ${src}`, error);
+              reject(error);
+            };
+            document.body.appendChild(script);
+          });
+        };
+
+        // Load scripts sequentially
+        const loadAllScripts = async () => {
+          try {
+            console.log("Starting script loading...");
+
+            await loadScript("js/api.js");
+            await loadScript("js/auth.js");
+            await loadScript("js/recruiter.js");
+
+            console.log("All scripts loaded successfully");
+
+            // Initialize dashboard after scripts are loaded
+            setTimeout(() => {
+              console.log("Initializing dashboard...");
+              if (typeof RecruiterDashboard !== "undefined") {
+                console.log("RecruiterDashboard found, initializing...");
+                window.dashboardInstance = new RecruiterDashboard();
+              } else {
+                console.error("RecruiterDashboard not found");
+              }
+            }, 100);
+          } catch (error) {
+            console.error("Error loading scripts:", error);
+          }
+        };
+
+        // Wait for DOM to be ready
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", loadAllScripts);
+        } else {
+          loadAllScripts();
+        }
+
+        // Mobile menu toggle
+        document.addEventListener("DOMContentLoaded", function () {
+          console.log("DOM loaded - Setting up mobile menu");
+
+          const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+          const navLinks = document.getElementById("navLinks");
+
+          if (mobileMenuBtn && navLinks) {
+            console.log("Setting up mobile menu listeners");
+            mobileMenuBtn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              navLinks.classList.toggle("active");
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener("click", function (event) {
+              if (
+                navLinks.classList.contains("active") &&
+                !navLinks.contains(event.target) &&
+                !mobileMenuBtn.contains(event.target)
+              ) {
+                navLinks.classList.remove("active");
+              }
+            });
+
+            // Prevent clicks inside navLinks from closing it
+            navLinks.addEventListener("click", function (e) {
+              e.stopPropagation();
+            });
+          }
+
+          // Check authentication state
+          const checkAuth = () => {
+            const token = localStorage.getItem("token");
+            const currentUser = localStorage.getItem("currentUser");
+
+            console.log("Auth check - Token:", !!token, "User:", !!currentUser);
+
+            if (!token || !currentUser) {
+              console.log("Not authenticated, redirecting to login...");
+              setTimeout(() => {
+                window.location.href = "login.html";
+              }, 100);
+              return;
+            }
+
+            // Update username if available
+            try {
+              const userData = JSON.parse(currentUser);
+              const userNameEl = document.getElementById("userName");
+              if (userNameEl && userData.fullName) {
+                userNameEl.textContent = userData.fullName;
+                console.log("Updated username to:", userData.fullName);
+              }
+
+              // Show test notification button for recruiters
+              if (userData.role === "RECRUITER") {
+                const testBtn = document.getElementById("testNotificationBtn");
+                if (testBtn) {
+                  testBtn.style.display = "inline-block";
+                  testBtn.addEventListener("click", function () {
+                    if (
+                      window.dashboardInstance &&
+                      window.dashboardInstance.testNotification
+                    ) {
+                      window.dashboardInstance.testNotification();
+                    } else {
+                      alert("Dashboard not fully loaded yet");
+                    }
+                  });
+                }
+              }
+            } catch (e) {
+              console.error("Error parsing user data:", e);
+            }
+          };
+
+          // Check auth after a short delay
+          setTimeout(checkAuth, 200);
+
+          // Setup logout button
+          const logoutBtn = document.getElementById("logoutBtn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              console.log("Logout clicked");
+
+              // Disconnect WebSocket
+              if (
+                window.webSocketState.stompClient &&
+                window.webSocketState.stompClient.connected
+              ) {
+                window.webSocketState.stompClient.disconnect();
+                console.log("STOMP disconnected");
+              }
+
+              // Clear storage
+              localStorage.removeItem("token");
+              localStorage.removeItem("currentUser");
+              sessionStorage.clear();
+
+              // Redirect to login
+              window.location.href = "login.html";
+            });
+          }
+
+          // Update auth buttons visibility
+          const authButtons = document.getElementById("authButtons");
+          const userMenu = document.querySelector(".user-menu");
+          if (authButtons && userMenu) {
+            // Hide user menu, show auth buttons (since auth.js will handle it)
+            userMenu.style.display = "none";
+            authButtons.style.display = "flex";
+          }
+        });
+
+        // Prevent infinite reloads
+        let reloadCount = sessionStorage.getItem("reloadCount") || 0;
+        reloadCount = parseInt(reloadCount);
+
+        if (reloadCount > 2) {
+          console.warn(
+            "Reload loop detected, clearing storage and redirecting..."
+          );
+          sessionStorage.setItem("reloadCount", "0");
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.href = "login.html";
+          return;
+        }
+
+        reloadCount++;
+        sessionStorage.setItem("reloadCount", reloadCount.toString());
+
+        // Reset reload count after 10 seconds
+        setTimeout(() => {
+          sessionStorage.setItem("reloadCount", "0");
+        }, 10000);
+
+        console.log("Page initialization complete");
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,214 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JobPulse - Find Your Dream Job</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-content">
+          <a href="index.html" class="logo">
+            <i class="fas fa-bolt"></i>
+            <span>JobPulse</span>
+          </a>
+
+          <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="#" id="jobsLink">Jobs</a>
+            <a href="#" id="employersLink">For Employers</a>
+            <a href="#" id="aboutLink">About</a>
+
+            <div id="authButtons">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Find Your Dream Job Today</h1>
+          <p>
+            Connect with top employers and discover opportunities that match
+            your skills and aspirations.
+          </p>
+          <div class="hero-buttons">
+            <a href="login.html" class="btn btn-primary">Start Your Journey</a>
+            <a href="register.html" class="btn btn-outline">Create Account</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">Why Choose JobPulse?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <i class="fas fa-bolt"></i>
+            <h3>Real-time Updates</h3>
+            <p>
+              Get instant notifications for new job postings and application
+              status.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Secure Platform</h3>
+            <p>
+              Your data is protected with industry-standard encryption and
+              security.
+            </p>
+          </div>
+          <div class="feature-card">
+            <i class="fas fa-briefcase"></i>
+            <h3>Top Companies</h3>
+            <p>
+              Connect with leading companies actively hiring for various roles.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="logo">
+            <i class="fas fa-bolt"></i>
+            <span>JobPulse</span>
+          </div>
+          <p>&copy; 2024 JobPulse. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+      // Add hero styles
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add hero styles dynamically
+        const style = document.createElement("style");
+        style.textContent = `
+                .hero {
+                    padding: 6rem 0;
+                    text-align: center;
+                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    color: white;
+                    margin-bottom: 3rem;
+                }
+                
+                .hero h1 {
+                    font-size: 3.5rem;
+                    margin-bottom: 1rem;
+                    font-weight: 700;
+                }
+                
+                .hero p {
+                    font-size: 1.2rem;
+                    max-width: 600px;
+                    margin: 0 auto 2rem;
+                    opacity: 0.9;
+                }
+                
+                .hero-buttons {
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: center;
+                }
+                
+                .hero .btn-outline {
+                    border-color: white;
+                    color: white;
+                }
+                
+                .hero .btn-outline:hover {
+                    background: white;
+                    color: var(--primary);
+                }
+                
+                .section-title {
+                    text-align: center;
+                    margin-bottom: 3rem;
+                    font-size: 2.5rem;
+                    color: var(--dark);
+                }
+                
+                .features-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 2rem;
+                    margin-bottom: 3rem;
+                }
+                
+                .feature-card {
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 12px;
+                    text-align: center;
+                    box-shadow: var(--shadow);
+                    transition: transform 0.3s;
+                }
+                
+                .feature-card:hover {
+                    transform: translateY(-5px);
+                }
+                
+                .feature-card i {
+                    font-size: 3rem;
+                    color: var(--primary);
+                    margin-bottom: 1.5rem;
+                }
+                
+                .feature-card h3 {
+                    margin-bottom: 1rem;
+                    color: var(--dark);
+                }
+                
+                .feature-card p {
+                    color: var(--secondary);
+                    line-height: 1.6;
+                }
+                
+                @media (max-width: 768px) {
+                    .hero h1 {
+                        font-size: 2.5rem;
+                    }
+                    
+                    .hero-buttons {
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    
+                    .hero-buttons .btn {
+                        width: 100%;
+                        max-width: 300px;
+                    }
+                }
+            `;
+        document.head.appendChild(style);
+
+        // Load auth state
+        auth.loadAuthState();
+      });
+    </script>
+  </body>
+</html>
